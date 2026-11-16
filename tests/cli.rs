@@ -136,8 +136,8 @@ fn writes_then_leaves_unchanged_then_refuses_then_overwrites() {
     assert_eq!(second.stderr, "unchanged: LICENSE\n");
     assert_eq!(sandbox.read("LICENSE"), ada);
 
-    let grace = ["MIT", "--holder", "Grace Hopper", "--year", "2026"];
-    let refused = sandbox.run(&grace);
+    let other = ["MIT", "--holder", "Alan Kay", "--year", "2026"];
+    let refused = sandbox.run(&other);
     assert_eq!(refused.code, 1);
     assert_eq!(
         refused.stderr,
@@ -145,13 +145,10 @@ fn writes_then_leaves_unchanged_then_refuses_then_overwrites() {
     );
     assert_eq!(sandbox.read("LICENSE"), ada);
 
-    let forced = sandbox.run(&[&grace[..], &["--force"]].concat());
+    let forced = sandbox.run(&[&other[..], &["--force"]].concat());
     assert_eq!(forced.code, 0);
     assert_eq!(forced.stderr, "overwritten: LICENSE\n");
-    assert_eq!(
-        sandbox.read("LICENSE"),
-        mit("Copyright (c) 2026 Grace Hopper")
-    );
+    assert_eq!(sandbox.read("LICENSE"), mit("Copyright (c) 2026 Alan Kay"));
     assert_eq!(sandbox.files(), ["LICENSE"]);
 }
 
@@ -188,16 +185,22 @@ fn several_licenses_get_one_file_each() {
 
 #[test]
 fn nothing_is_written_if_one_of_several_files_differs() {
-    let sandbox = Sandbox::new();
-    sandbox.write("LICENSE-APACHE", "old");
-    let run = sandbox.run(&[&["MIT", "OR", "Apache-2.0"], &ADA[..]].concat());
-    assert_eq!(run.code, 1);
-    assert_eq!(
-        run.stderr,
-        "error: LICENSE-APACHE already exists and differs (use --force to overwrite)\n"
-    );
-    assert_eq!(sandbox.files(), ["LICENSE-APACHE"]);
-    assert_eq!(sandbox.read("LICENSE-APACHE"), "old");
+    // Whether the refused file comes first or last, the other is not created.
+    for (existing, missing) in [
+        ("LICENSE-MIT", "LICENSE-APACHE"),
+        ("LICENSE-APACHE", "LICENSE-MIT"),
+    ] {
+        let sandbox = Sandbox::new();
+        sandbox.write(existing, "old");
+        let run = sandbox.run(&[&["MIT", "OR", "Apache-2.0"], &ADA[..]].concat());
+        assert_eq!(run.code, 1);
+        assert_eq!(
+            run.stderr,
+            format!("error: {existing} already exists and differs (use --force to overwrite)\n")
+        );
+        assert_eq!(sandbox.files(), [existing], "{missing} must not be created");
+        assert_eq!(sandbox.read(existing), "old");
+    }
 }
 
 #[test]
@@ -235,7 +238,7 @@ fn an_explicit_output_follows_the_same_existing_file_rules() {
     assert_eq!(sandbox.generate(&args).stderr, "created: docs/NOTICE\n");
     assert_eq!(sandbox.generate(&args).stderr, "unchanged: docs/NOTICE\n");
 
-    let refused = sandbox.run(&[&args[..], &["--holder", "Grace Hopper"]].concat());
+    let refused = sandbox.run(&[&args[..], &["--holder", "Alan Kay"]].concat());
     assert_eq!(refused.code, 1);
     assert_eq!(
         refused.stderr,

@@ -387,6 +387,12 @@ mod tests {
     }
 
     #[test]
+    fn the_closest_identifier_wins_over_an_earlier_one() {
+        // MIT comes first in the table at distance 2, MIT-0 is at distance 1.
+        assert!(failure("MIT-1").contains("tip: did you mean 'MIT-0'?"));
+    }
+
+    #[test]
     fn an_unknown_identifier_without_a_close_match_gets_no_tip() {
         let no_tip = |token: &str| format!("unknown or unsupported license '{token}'\n{RUN_LIST}");
         assert_eq!(failure("Proprietary"), no_tip("Proprietary"));
@@ -416,6 +422,10 @@ mod tests {
         assert_eq!(levenshtein("mti", "mit"), 2);
         assert_eq!(levenshtein("kitten", "sitting"), 3);
         assert_eq!(levenshtein("flaw", "lawn"), 2);
+        // One deletion, then one insertion, away from the start.
+        assert_eq!(levenshtein("abcx", "abc"), 1);
+        assert_eq!(levenshtein("abc", "abcx"), 1);
+        assert_eq!(levenshtein("axbc", "abc"), 1);
     }
 
     const HOLDER: &str = "Ada Lovelace";
@@ -758,6 +768,13 @@ mod tests {
         assert_eq!(plan(&same, &dir, false), Ok(vec![Step::Unchanged]));
         let different = [target("LICENSE", Some(("license", "old")))];
         assert_eq!(plan(&different, &dir, false), refusal(DIFFERS));
+
+        // A symbolic link: the target resolves to a file with another name.
+        let link = [target("LICENSE", Some(("LICENSE.txt", TEXT)))];
+        assert_eq!(
+            plan(&link, &files(&["LICENSE"]), false),
+            Ok(vec![Step::Unchanged])
+        );
 
         // Case-sensitive file system: `license` is a different file.
         let absent = [target("LICENSE", None)];
