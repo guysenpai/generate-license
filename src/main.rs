@@ -140,6 +140,9 @@ fn parse(mut parser: lexopt::Parser) -> Result<Command, lexopt::Error> {
         (None, true) => Year::Omitted,
         (None, false) => Year::Current,
     };
+    if holder.as_deref() == Some("") {
+        return Err("--holder requires a non-empty value".into());
+    }
     if !list {
         return Ok(Command::Generate(Args {
             expression,
@@ -201,7 +204,7 @@ fn current_year() -> String {
 }
 
 fn holder(given: Option<&str>) -> Result<String, Error> {
-    if let Some(holder) = given.filter(|h| !h.is_empty()) {
+    if let Some(holder) = given {
         return Ok(holder.to_string());
     }
     let git = std::process::Command::new("git")

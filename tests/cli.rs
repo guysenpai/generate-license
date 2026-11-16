@@ -352,22 +352,33 @@ fn the_year_defaults_to_the_current_one() {
 fn the_holder_defaults_to_the_git_user_name() {
     let sandbox = Sandbox::new();
     sandbox.set_git_user("Ada Lovelace");
-    for args in [
-        &["MIT", "--year", "2026"][..],
-        &["MIT", "--year", "2026", "--holder", ""],
-    ] {
-        let run = sandbox.run(args);
-        assert_eq!(run.code, 0);
+    let run = sandbox.run(&["MIT", "--year", "2026"]);
+    assert_eq!(run.code, 0);
+    assert_eq!(
+        run.stderr,
+        "holder: Ada Lovelace (from git config user.name)\ncreated: LICENSE\n"
+    );
+    assert_eq!(run.stdout, "");
+    assert_eq!(
+        sandbox.read("LICENSE"),
+        mit("Copyright (c) 2026 Ada Lovelace")
+    );
+}
+
+#[test]
+fn an_empty_holder_is_a_usage_error_and_does_not_fall_back_to_git() {
+    let sandbox = Sandbox::new();
+    sandbox.set_git_user("Ada Lovelace");
+    for license in ["MIT", "Apache-2.0"] {
+        let run = sandbox.run(&[license, "--holder", ""]);
+        assert_eq!(run.code, 2, "{license}");
         assert_eq!(
-            run.stderr.lines().next(),
-            Some("holder: Ada Lovelace (from git config user.name)")
-        );
-        assert_eq!(run.stdout, "");
-        assert_eq!(
-            sandbox.read("LICENSE"),
-            mit("Copyright (c) 2026 Ada Lovelace")
+            run.stderr,
+            format!("error: --holder requires a non-empty value\n{USAGE_HINT}"),
+            "{license}"
         );
     }
+    assert!(sandbox.files().is_empty());
 }
 
 #[test]
@@ -499,6 +510,10 @@ fn usage_errors_exit_with_2_and_point_to_help() {
             "--year and --no-year cannot be used together",
         ),
         (&["MIT", "--year", ""], "--year must not be empty"),
+        (
+            &["MIT", "--holder", ""],
+            "--holder requires a non-empty value",
+        ),
         (
             &["--list", "MIT"],
             "--list does not take a license expression",
