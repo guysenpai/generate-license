@@ -1,4 +1,5 @@
 # Checks that GitHub's license detector recognizes the generated files.
+# Runs on demand, and on pushes and pull requests that touch the license texts, the registry, the check script or this file.
 name: licensee
 
 on:
