@@ -1,0 +1,31 @@
+# Checks that GitHub's license detector recognizes the generated files.
+name: licensee
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - licenses/**
+      - src/registry.rs
+      - scripts/check-licensee.sh
+      - .github/workflows/licensee.yml
+  pull_request:
+    paths:
+      - licenses/**
+      - src/registry.rs
+      - scripts/check-licensee.sh
+      - .github/workflows/licensee.yml
+
+permissions:
+  contents: read
+
+jobs:
+  licensee:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install licensee
+        run: sudo gem install licensee --version 10.1.0 --no-document
+      - run: rustup update stable
+      - run: cargo build
+      - run: scripts/check-licensee.sh target/debug/generate-license
