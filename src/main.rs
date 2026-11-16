@@ -297,8 +297,10 @@ mod tests {
         // Built at run time so that this test does not match itself.
         let short = parsed_options(&format!("Short{}", "('"), '\'');
         let long = parsed_options(&format!("Long{}", "(\""), '"');
+        // Guard: if the parser moves or changes shape and nothing is found
+        // any more, fail instead of checking an empty list.
+        assert_eq!(long.len(), 8, "expected the parser's 8 options: {long:?}");
         assert_eq!(short, ["o", "f", "h", "V"]);
-        assert_eq!(long.len(), 8);
         for name in short {
             assert!(HELP.contains(&format!("\n  -{name}, --")), "-{name}");
         }
