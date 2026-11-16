@@ -1,0 +1,22 @@
+The license texts in this directory come from two sources.
+
+choosealicense.com (21 files)
+  Repository: https://github.com/github/choosealicense.com
+  Branch:     gh-pages
+  Commit:     af50be9eb902b4329e70c33a5f5c9bab891ef26d
+  Files:      _licenses/<name>.txt, saved here under the same name
+  URL:        https://raw.githubusercontent.com/github/choosealicense.com/af50be9eb902b4329e70c33a5f5c9bab891ef26d/_licenses/<name>.txt
+
+Creative Commons (4 files)
+  URL:        https://creativecommons.org/licenses/<variant>/4.0/legalcode.txt
+  Variants:   by-nd, by-nc, by-nc-sa, by-nc-nd, saved here as cc-<variant>-4.0.txt
+  Downloaded: 2026-11-16
+
+Normalization (the only changes made to the upstream files)
+  - choosealicense.com files: the YAML front matter (everything up to and
+    including the second "---" line) and the blank lines that follow it are
+    removed.
+  - All files: UTF-8 without BOM, LF line endings, exactly one trailing newline.
+
+SHA256SUMS holds the checksum of every text. Verify with:
+  sha256sum -c SHA256SUMS

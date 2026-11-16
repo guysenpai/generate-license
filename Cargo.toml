@@ -1,0 +1,13 @@
+[package]
+name = "generate-license"
+version = "0.1.0-rc.1"
+edition = "2024"
+description = "Generate license files from SPDX identifiers"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/guysenpai/generate-license"
+readme = "README.md"
+keywords = ["license", "spdx", "cli", "generator"]
+categories = ["command-line-utilities"]
+
+[dependencies]
+lexopt = "0.3.2"
