@@ -135,7 +135,9 @@ fn parse(mut parser: lexopt::Parser) -> Result<Command, lexopt::Error> {
     }
     let year = match (year, no_year) {
         (Some(_), true) => return Err("--year and --no-year cannot be used together".into()),
-        (Some(year), false) if year.is_empty() => return Err("--year must not be empty".into()),
+        (Some(year), false) if year.is_empty() => {
+            return Err("--year requires a non-empty value".into());
+        }
         (Some(year), false) => Year::Given(year),
         (None, true) => Year::Omitted,
         (None, false) => Year::Current,

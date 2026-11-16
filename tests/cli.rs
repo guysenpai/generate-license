@@ -509,7 +509,7 @@ fn usage_errors_exit_with_2_and_point_to_help() {
             &["MIT", "--year", "2026", "--no-year"],
             "--year and --no-year cannot be used together",
         ),
-        (&["MIT", "--year", ""], "--year must not be empty"),
+        (&["MIT", "--year", ""], "--year requires a non-empty value"),
         (
             &["MIT", "--holder", ""],
             "--holder requires a non-empty value",
